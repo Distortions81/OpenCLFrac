@@ -85,9 +85,9 @@ func main() {
 		panic(err)
 	}
 
-	width := uint32(8196)
-	height := uint32(8196)
-	maxIter := uint32(1000)
+	width := uint32(8192)
+	height := uint32(8192)
+	maxIter := uint32(10000)
 	xmin := float32(-2.0)
 	xmax := float32(1.0)
 	ymin := float32(-1.2)
