@@ -39,17 +39,13 @@ int main() {
     cl_platform_id platform;
     clGetPlatformIDs(1, &platform, NULL);
 
+    cl_device_id device;
     cl_uint num_devices = 0;
-    err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, NULL, &num_devices);
-    if (num_devices == 0) {
-        err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, 1, NULL, &num_devices);
-    }
+    err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, 1, &device, &num_devices);
     if (err != CL_SUCCESS || num_devices == 0) {
         fprintf(stderr, "No OpenCL devices found\n");
         return 1;
     }
-    cl_device_id device;
-    clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, 1, &device, NULL);
 
     cl_context context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
     check(err, "create context");
