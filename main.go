@@ -20,23 +20,52 @@ __kernel void mandelbrot(__global uchar* img,
     uint y = gid / width;
     if (x >= width || y >= height) return;
 
-    float cr = xmin + ((float)x / (float)(width - 1)) * (xmax - xmin);
-    float ci = ymin + ((float)y / (float)(height - 1)) * (ymax - ymin);
-    float zr = 0.0f;
-    float zi = 0.0f;
-    uint iter = 0;
-    while (zr * zr + zi * zi <= 4.0f && iter < maxIter) {
-        float tmp = zr * zr - zi * zi + cr;
-        zi = 2.0f * zr * zi + ci;
-        zr = tmp;
-        iter++;
+    float dx = (xmax - xmin) / (float)(width - 1);
+    float dy = (ymax - ymin) / (float)(height - 1);
+
+    float rSum = 0.0f;
+    float gSum = 0.0f;
+    float bSum = 0.0f;
+
+    for (int sy = 0; sy < 8; sy++) {
+        for (int sx = 0; sx < 8; sx++) {
+            float cr = xmin + ((float)x + ((float)sx + 0.5f) / 8.0f) * dx;
+            float ci = ymin + ((float)y + ((float)sy + 0.5f) / 8.0f) * dy;
+
+            float zr = 0.0f;
+            float zi = 0.0f;
+            uint iter = 0;
+            while (zr * zr + zi * zi <= 4.0f && iter < maxIter) {
+                float tmp = zr * zr - zi * zi + cr;
+                zi = 2.0f * zr * zi + ci;
+                zr = tmp;
+                iter++;
+            }
+
+            float t = (float)iter / (float)maxIter;
+            float r = 9.0f * (1.0f - t) * t * t * t;
+            float g = 15.0f * (1.0f - t) * (1.0f - t) * t * t;
+            float b = 8.5f * (1.0f - t) * (1.0f - t) * (1.0f - t) * t;
+
+            rSum += r;
+            gSum += g;
+            bSum += b;
+        }
     }
-    uchar color = (uchar)(255 - (iter * 255) / maxIter);
-    uint idx = gid * 4;
-    img[idx + 0] = color;
-    img[idx + 1] = color;
-    img[idx + 2] = color;
-    img[idx + 3] = 255;
+
+    ushort r = (ushort)(rSum / 64.0f * 65535.0f);
+    ushort g = (ushort)(gSum / 64.0f * 65535.0f);
+    ushort b = (ushort)(bSum / 64.0f * 65535.0f);
+
+    uint idx = gid * 8;
+    img[idx + 0] = (uchar)(r >> 8);
+    img[idx + 1] = (uchar)(r & 0xFF);
+    img[idx + 2] = (uchar)(g >> 8);
+    img[idx + 3] = (uchar)(g & 0xFF);
+    img[idx + 4] = (uchar)(b >> 8);
+    img[idx + 5] = (uchar)(b & 0xFF);
+    img[idx + 6] = 0xFF;
+    img[idx + 7] = 0xFF;
 }`
 
 func main() {
@@ -56,15 +85,15 @@ func main() {
 		panic(err)
 	}
 
-	width := uint32(800)
-	height := uint32(600)
+	width := uint32(8196)
+	height := uint32(8196)
 	maxIter := uint32(1000)
 	xmin := float32(-2.0)
 	xmax := float32(1.0)
 	ymin := float32(-1.2)
 	ymax := float32(1.2)
 
-	bufSize := int(width * height * 4)
+	bufSize := int(width * height * 8)
 	imgBuf, err := runner.CreateEmptyBuffer(cl.WRITE_ONLY, bufSize)
 	if err != nil {
 		panic(err)
@@ -91,9 +120,9 @@ func main() {
 		panic(err)
 	}
 
-	img := &image.RGBA{
+	img := &image.RGBA64{
 		Pix:    data,
-		Stride: int(width) * 4,
+		Stride: int(width) * 8,
 		Rect:   image.Rect(0, 0, int(width), int(height)),
 	}
 
