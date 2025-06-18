@@ -16,9 +16,9 @@ func getBestDevice() *cl.OpenCLDevice {
 	var maxUnits uint32
 	for _, p := range info.Platforms {
 		for _, d := range p.Devices {
-			if d.Max_compute_units > maxUnits {
+			if uint32(d.Max_compute_units) > maxUnits {
 				best = d
-				maxUnits = d.Max_compute_units
+				maxUnits = uint32(d.Max_compute_units)
 			}
 		}
 	}
