@@ -115,7 +115,7 @@ func main() {
 
 	// Use the device's maximum work-group size to better saturate the GPU.
 	global := uint64(width) * uint64(height)
-	local := []uint64{uint64(device.Max_work_group_size)}
+	local := []uint64{uint64(1)}
 	if err := runner.RunKernel("mandelbrot", 1, nil, []uint64{global}, local, args, true); err != nil {
 		panic(err)
 	}
