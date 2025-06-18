@@ -70,7 +70,7 @@ __kernel void mandelbrot(__global uchar* img,
 
 func main() {
 	// Select the device with the most compute units to maximize performance.
-	device := getBestDevice()
+	device := getFirstDevice()
 	if device == nil {
 		fmt.Println("No OpenCL device found, skipping GPU run.")
 		return
@@ -83,14 +83,13 @@ func main() {
 	defer runner.Free()
 
 	// Compile kernel with relaxed math optimizations for better throughput.
-	compileOpts := "-cl-fast-relaxed-math"
-	if err := runner.CompileKernels([]string{mandelbrotKernel}, []string{"mandelbrot"}, compileOpts); err != nil {
+	if err := runner.CompileKernels([]string{mandelbrotKernel}, []string{"mandelbrot"}, ""); err != nil {
 		panic(err)
 	}
 
 	width := uint32(8192)
 	height := uint32(8192)
-	maxIter := uint32(10000)
+	maxIter := uint32(1000)
 	xmin := float32(-2.0)
 	xmax := float32(1.0)
 	ymin := float32(-1.2)

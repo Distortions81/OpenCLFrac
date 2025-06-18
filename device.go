@@ -6,21 +6,15 @@ import (
 
 // getBestDevice scans all available OpenCL devices and returns the one with the
 // highest compute unit count. If no devices are found, nil is returned.
-func getBestDevice() *cl.OpenCLDevice {
+func getFirstDevice() *cl.OpenCLDevice {
 	info, err := cl.Info()
 	if err != nil || info.Platform_count == 0 {
 		return nil
 	}
-
-	var best *cl.OpenCLDevice
-	var maxUnits uint32
 	for _, p := range info.Platforms {
-		for _, d := range p.Devices {
-			if uint32(d.Max_compute_units) > maxUnits {
-				best = d
-				maxUnits = uint32(d.Max_compute_units)
-			}
+		if len(p.Devices) > 0 {
+			return p.Devices[0]
 		}
 	}
-	return best
+	return nil
 }
