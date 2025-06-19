@@ -93,7 +93,7 @@ func main() {
 	ymin := float32(-1.5)
 	ymax := float32(1.5)
 
-	bufSize := int(width * height * 8)
+	bufSize := int(width * height * 64)
 	imgBuf, err := runner.CreateEmptyBuffer(cl.WRITE_ONLY, bufSize)
 	if err != nil {
 		panic(err)
