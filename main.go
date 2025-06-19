@@ -90,8 +90,8 @@ func main() {
 	maxIter := uint32(100)
 	xmin := float32(-2.0)
 	xmax := float32(1.0)
-	ymin := float32(-1.125)
-	ymax := float32(1.125)
+	ymin := float32(-1.5)
+	ymax := float32(1.5)
 
 	bufSize := int(width * height * 8)
 	imgBuf, err := runner.CreateEmptyBuffer(cl.WRITE_ONLY, bufSize)
